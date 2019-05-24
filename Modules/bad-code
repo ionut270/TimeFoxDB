@@ -1,0 +1,115 @@
+				.then(res => {
+					var matricol = i + year + getRandomInt(30);
+					if (userTypes === "Student") {
+						question = "INSERT INTO STUDENTI VALUES(";
+						question += matricol;
+						question += ",'" + name + "'";
+						question += ",'" + surname + "')";
+						console.log(question)
+						sql_querry(connection, err, question).then(res => {
+							if (populare_grupa === 50 || i === 0) {
+								if (populare_grupa === 50) {
+									populare_grupa = 0;
+								}
+								if (index_grupa === 769) {
+									index_grupa = 0;
+								}
+								if (index_litera === 26) {
+									index_litera = 0;
+									index_grupa++;
+								}
+								id_grupa = i + getRandomInt(30);
+								question = "INSERT INTO GRUPA VALUES(";
+								question += id_grupa;
+								question += ",'" + template.chars[index_litera] + index_grupa + "')";
+								console.log(question)
+								index_litera++;
+								sql_querry(connection, err, question) // am creat o grupa
+									.then(res => {
+										let idSala = i + j + getRandomInt(100);
+										question = "INSERT INTO SALI VALUES(";
+										question += idSala;
+										question += "," + getRandomInt(200);
+										question += ",'" + template.chars[getRandomInt(template.chars.length)] + getRandomInt(999);
+										question += "')";
+										console.log(question)
+										sql_querry(connection, err, question);
+
+										for (let j = 0; j < 6; j++) {
+											var id_materie ="" + i + j + getRandomInt(100);
+											question = "INSERT INTO MATERIE VALUES(";
+											question += id_materie;
+											question += ",'Seminar'";
+											question += ",'" + template.courses[getRandomInt(template.courses.length)];
+											question += "')";
+											console.log(question)
+											sql_querry(connection, err, question)
+												//ne trebuie un profesor ...
+												//cream un nou utilizator
+												// si dupa un prof pt el
+												.then(res => {
+													var name2 = template.names[getRandomInt(template.names.length)];
+													var surname2 = template.surnames[getRandomInt(template.surnames.length)];
+													var email2 = surname.toLowerCase() + "." + name.toLowerCase() + i + "@info.uaic.ro";
+													var userTypes2 = template.userType[getRandomInt(template.userType.length)];
+													var yea2r = genYear();
+													var question = "INSERT INTO USERS VALUES(";
+													question += i + getRandomInt(1000) + idSala + id_grupa;
+													question += ",'session'";
+													question += ",'" + name + "'";
+													question += ",'" + surname + "'";
+													question += ",'" + getRandomInt(30) + "." + getRandomInt(30) + "." + year + "'";
+													question += ",'" + email + "'";
+													question += ",'12345'";
+													question += ",'" + "Profesor" + "')";
+													console.log(question)
+													sql_querry(connection, err, question).then(res => {
+														var id_prof = i + year + getRandomInt(30);
+														question = "INSERT INTO PROF VALUES(";
+														question += id_prof;
+														question += "," + id_materie + ")";
+														console.log(question)
+														sql_querry(connection, err, question).then(res => {
+															question = "INSERT INTO MATERIE_PROF VALUES(";
+															question += id_prof;
+															question += ",'" + name + "'";
+															question += ",'" + surname + "')";
+															console.log(question)
+															sql_querry(connection, err, question)
+															.then(res=>{
+																/**
+																 * We need a day
+																 * and to make sure classes don't overlap
+																 */
+																var id_ora = getRandomInt(30)+getRandomInt(30)+getRandomInt(30);
+																question = "INSERT INTO PROGRAM VALUES(";
+																question += id_ora;
+																question += ",'" + name + "'";
+																question += ",'" + surname + "')";
+															})
+														});
+													});
+												});
+										}
+									});
+							} else {
+								//inseram in grupa un student
+								question = "INSERT INTO STUDENTI_GRUPA VALUES(";
+								question += matricol + "," + id_grupa + ")";
+								console.log(question)
+								sql_querry(connection, err, question);
+								populare_grupa++;
+							}
+						});
+					} else {
+						question = "INSERT INTO PROF VALUES(";
+						question += i + year + getRandomInt(30);
+						question += ",'" + name + "'";
+						question += ",'" + surname + "')";
+						return sql_querry(connection, err, question);
+					}
+				})
+				.then(res => {
+					return res.json();
+				})
+				.then(res => {});
