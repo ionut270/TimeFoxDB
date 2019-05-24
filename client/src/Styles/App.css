@@ -1,0 +1,107 @@
+.App {
+  text-align: center;
+}
+
+.App-logo {
+  animation: App-logo-spin infinite 20s linear;
+  height:40px;
+  object-fit: cover;
+  pointer-events: none;
+  margin-left: 2rem !important;
+}
+
+.App-header {
+  background-color: #282c34;
+  height: 64px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  align-content: center;
+  align-self: center;
+  justify-content: left;
+  font-size: calc(10px + 2vmin);
+  color: white;
+  position: fixed;
+  width: 100%;
+  top: 0;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.HeaderPageButtons{
+  height: 100% !important;
+  margin-left: 2rem !important;
+}
+
+.activated, .HeaderPageButtons:active{
+  color: orange !important;
+  border-bottom: 3px solid orange !important;
+  padding-bottom: 1px !important;
+}
+
+
+.HeaderBgCollor{
+  background-color: #282c34 !important;
+  border-radius: 0px !important;
+}
+.HeaderBgCollor:hover{
+  background-color: #3c3f44 !important;
+  color: rgb(255, 208, 180) !important;
+}
+
+.MainTabMenu{
+  padding-left: 6em !important;
+  /* border-bottom: 0px !important; */
+  margin: 0 !important;
+  position: fixed;
+  width: 100%;
+  background-color: white !important;
+  /* border: 1px solid rgba(34,36,38,.15) !important; */
+}
+
+.ScheduleGeneral{
+  display: flex !important;
+  padding-top: 42px !important;
+  margin-top:64px;
+}
+
+.SchedulePersonal{
+  display: flex !important;
+  padding-top: 42px !important;
+  margin-top:64px;
+}
+
+.ScheduleGeneralTable{
+  width: calc(100% - 15rem) !important;
+  right: 0;
+  margin-left: 15rem !important;
+}
+
+.ScheduleTableMenu{
+  position: fixed;
+  border-right: 0px !important;
+  border-top-right-radius: 0px !important;
+  border-bottom-right-radius: 0px !important;
+  height: 100%;
+}
+
+.PaddedButtonsTable{
+  width: 100% !important;
+  margin-top: 1em !important;
+}
+/* .HeaderBgCollor:active{
+  color: orange !important;
+  border-bottom: 3px solid orange !important;
+  padding-bottom: 1px !important;
+} */
