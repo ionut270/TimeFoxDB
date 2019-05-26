@@ -8,16 +8,18 @@ const readline = require("readline").createInterface({
 
 oracledb.autoCommit = true;
 
-String.prototype.replaceAt = function(index, replacement) {
+String.prototype.replaceAt = function (index, replacement) {
 	return this.substr(0, index) + replacement + this.substr(index + 1, this.length + replacement.length);
 };
 
 function getRandomInt(max) {
 	return Math.floor(Math.random() * Math.floor(max));
 }
+
 function getRandomIntPos(max) {
 	return Math.floor(Math.random() * Math.floor(max)) + 1;
 }
+
 function genYear() {
 	return getRandomInt(20) + 1980;
 }
@@ -56,18 +58,15 @@ function sql_querry(connection, err, input) {
 	if (input === "exit") {
 		process.stdout.write("\033c");
 	} else {
+		console.log("Executing ... ")
 		return connection
 			.execute(input)
 			.then(response => {
-				console.log(response , input);
+				console.log(response, input);
 				return response;
 			})
 			.catch(reject => {
-				// for(i=0;i<reject.offset;i++){
-				// 	console.log("i="+i+'='+input[i]+'\n');
-				// }
 				input = input.replaceAt(reject.offset, "\x1b[31m" + input[reject.offset] + "\x1b[0m");
-				//input[reject.offset] = "\x1b[31m" + input[reject.offset] + "\x1b[0m";
 				console.log("ERROR AT " + reject.offset + "! \n", input, "\n", reject);
 				return reject;
 			});
@@ -77,14 +76,14 @@ function sql_querry(connection, err, input) {
 function create_tables(connection, err) {
 	console.log("Creatin tables!");
 	var que = new Promise((res, rej) => {
-		res(
-			sql_querry(
-				connection,
-				err,
-				"CREATE TABLE USERS(ID INTEGER NOT NULL,SESSION_ID VARCHAR2(50),NAME VARCHAR2(50) NOT NULL,SURNAME VARCHAR2(50) NOT NULL,DATA_NASTERE VARCHAR2(10),EMAIL VARCHAR2(50) NOT NULL,USER_PASSWORD VARCHAR2(50) NOT NULL,USER_TYPE VARCHAR2(10),PRIMARY KEY(ID))",
-			),
-		);
-	})
+			res(
+				sql_querry(
+					connection,
+					err,
+					"CREATE TABLE USERS(ID INTEGER NOT NULL,SESSION_ID VARCHAR2(50),NAME VARCHAR2(50) NOT NULL,SURNAME VARCHAR2(50) NOT NULL,DATA_NASTERE VARCHAR2(10),EMAIL VARCHAR2(50) NOT NULL,USER_PASSWORD VARCHAR2(50) NOT NULL,USER_TYPE VARCHAR2(10),PRIMARY KEY(ID))",
+				),
+			);
+		})
 
 		.then(resp => {
 			sql_querry(
@@ -218,7 +217,7 @@ function create_tables(connection, err) {
 
 function start(obj) {
 	console.log("SQL MODULE LAUNCHED!");
-	oracledb.getConnection(config, function(err, connection) {
+	oracledb.getConnection(config, function (err, connection) {
 		console.log("Connected!");
 		if (obj.use_cmd_input) {
 			console.log("Input enabled!");
@@ -237,56 +236,52 @@ function sleep(ms) {
 }
 
 function populate(size) {
-	oracledb.getConnection(config, async function(err, connection) {
+	oracledb.getConnection(config, async function (err, connection) {
 		//cream materiile prima data ...
+		console.log(connection + "\n\n")
 		for (let j = 0; j < template.courses.length; j++) {
 			question = "INSERT INTO MATERIE VALUES(";
 			question += j;
 			question += ",'Seminar'";
 			question += ",'" + template.courses[j];
 			question += "')";
-			//console.log(question);
+			console.log(question);
 			sql_querry(connection, err, question).then(res => {
-				if (j === template.courses.length - 1) {
-					var index = 0;
-					for (m = 0; m < 7; m++) {
-						for (n = 0; n < 12; n += 2) {
-							var incepe_la = 8 + n;
-							var se_termina_la = incepe_la + 2;
-							question = "INSERT INTO PROGRAM VALUES(";
-							question += index;
-							question += ",'" + template.day[m];
-							question += "'," + incepe_la;
-							question += "," + se_termina_la + ")";
-							//console.log(question);
-							sql_querry(connection, err, question);
-							index++;
+					if (j === template.courses.length - 1) {
+						var index = 0;
+						for (m = 0; m < 7; m++) {
+							for (n = 0; n < 12; n += 2) {
+								var incepe_la = 8 + n;
+								var se_termina_la = incepe_la + 2;
+								question = "INSERT INTO PROGRAM VALUES(";
+								question += index;
+								question += ",'" + template.day[m];
+								question += "'," + incepe_la;
+								question += "," + se_termina_la + ")";
+								//console.log(question);
+								sql_querry(connection, err, question);
+								index++;
+							}
 						}
+						setTimeout(function () {
+							populate_phase_2(size, err, connection)
+						}, 5000);
 					}
-					populate_phase_2(size, err, connection);
-				}
-			});
+				})
+				.catch(res => {
+					console.log("Err");
+					console.log(res);
+				})
 		}
 	});
 }
 
 function populate_phase_2(size, err, connection) {
-	var students = 0;
-	var profesori = 0; // if 20 000 genereaza numai studenti
-	var index_grupa = 0; //max 769
-	var populare_grupa = 0; // max 50
-	var index_litera = 0; // max 26 incepand de la 1 deci 25
-	var id_grupa = 0;
-	// 5 cursuri si 6 seminarii
-	//33 333 grupe :/
-	//pai incep pe rand sa bag cate un student intro grupa
-	for (var i = 2000000; i < size+2000000; i++) {
+	for (var i = 0; i < size; i++) {
 		var name = template.names[getRandomInt(template.names.length)];
 		var surname = template.surnames[getRandomInt(template.surnames.length)];
 		var email = surname.toLowerCase() + "." + name.toLowerCase() + i + "@info.uaic.ro";
 		var year = genYear();
-		//console.log(i);
-
 		var question = "INSERT INTO USERS VALUES(";
 		question += i;
 		question += ",'session'";
@@ -296,81 +291,92 @@ function populate_phase_2(size, err, connection) {
 		question += ",'" + email + "'";
 		question += ",'12345'";
 		question += ",'" + "Student" + "')";
-		sql_querry(connection, err, question).then(res => {
-			var matricol = i + year + getRandomInt(30);
-			question = "INSERT INTO STUDENTI VALUES(";
-			question += matricol;
-			question += ",'" + name + "'";
-			question += ",'" + surname + "')";
-			sql_querry(connection, err, question).then(res => {
-				if (populare_grupa === 50 || i <= 10) {
-					populare_grupa = 0;
-					if (index_grupa === 769) {
-						index_grupa = 0;
-					}
-					if (index_litera === 26) {
-						index_litera = 0;
-						index_grupa++;
-					}
-					id_grupa = i + getRandomInt(30);
-					question = "INSERT INTO GRUPA VALUES(";
-					question += id_grupa;
-					question += ",'" + template.chars[index_litera] + index_grupa + "')";
-					index_litera++;
-					sql_querry(connection, err, question) // am creat o grupa
-						.then(res => {
-							let idSala = i + getRandomInt(10000);
-							question = "INSERT INTO SALI VALUES(";
-							question += idSala;
-							question += "," + getRandomInt(200);
-							question += ",'" + template.chars[getRandomInt(template.chars.length)] + getRandomInt(999);
+		sql_querry(connection, err, question)
+		populate_phase_3(err, connection, name, surname, i, year)
+		// setTimeout(function (name, surname) {
+		// 	populate_phase_3(err, connection, name, surname, i, year)
+		// }, 5000);
+	}
+}
+var students = 0;
+var index_grupa = 0; //max 769
+var populare_grupa = 0; // max 50
+var index_litera = 0; // max 26 incepand de la 1 deci 25
+var id_grupa = 0;
+
+function populate_phase_3(err, connection, name, surname, i, year) {
+	students = students + 1;
+	var question = "INSERT INTO STUDENTI VALUES(";
+	question += students;
+	question += ",'" + name + "'";
+	question += ",'" + surname + "')";
+	sql_querry(connection, err, question).then(res => {
+		if (populare_grupa === 50 || i <= 10) {
+			populare_grupa = 0;
+			if (index_grupa === 769) {
+				index_grupa = 0;
+			}
+			if (index_litera === 26) {
+				index_litera = 0;
+				index_grupa++;
+			}
+			id_grupa = i + getRandomInt(30);
+			question = "INSERT INTO GRUPA VALUES(";
+			question += id_grupa;
+			question += ",'" + template.chars[index_litera] + index_grupa + "')";
+			index_litera++;
+			sql_querry(connection, err, question) // am creat o grupa
+				.then(res => {
+					let idSala = i + getRandomInt(10000);
+					question = "INSERT INTO SALI VALUES(";
+					question += idSala;
+					question += "," + getRandomInt(200);
+					question += ",'" + template.chars[getRandomInt(template.chars.length)] + getRandomInt(999);
+					question += "')";
+					sql_querry(connection, err, question).then(res => {
+						var name2 = template.names[getRandomInt(template.names.length)];
+						var surname2 = template.surnames[getRandomInt(template.surnames.length)];
+						var email2 = surname.toLowerCase() + "." + name.toLowerCase() + i + "@info.uaic.ro";
+						var userTypes2 = template.userType[getRandomInt(template.userType.length)];
+						var yea2r = genYear();
+						var question = "INSERT INTO USERS VALUES(";
+						question += i + getRandomInt(10000) + idSala + id_grupa;
+						question += ",'session'";
+						question += ",'" + name2 + "'";
+						question += ",'" + surname2 + "'";
+						question += ",'" + getRandomInt(30) + "." + getRandomInt(30) + "." + yea2r + "'";
+						question += ",'" + email2 + "'";
+						question += ",'12345'";
+						question += ",'" + "Profesor" + "')";
+						sql_querry(connection, err, question).then(res => {
+							var id_prof = i + year + getRandomInt(10000);
+							question = "INSERT INTO PROF VALUES(";
+							question += id_prof;
+							question += ",'" + name2;
+							question += "','" + surname2;
 							question += "')";
 							sql_querry(connection, err, question).then(res => {
-								var name2 = template.names[getRandomInt(template.names.length)];
-								var surname2 = template.surnames[getRandomInt(template.surnames.length)];
-								var email2 = surname.toLowerCase() + "." + name.toLowerCase() + i + "@info.uaic.ro";
-								var userTypes2 = template.userType[getRandomInt(template.userType.length)];
-								var yea2r = genYear();
-								var question = "INSERT INTO USERS VALUES(";
-								question += i + getRandomInt(10000) + idSala + id_grupa;
-								question += ",'session'";
-								question += ",'" + name2 + "'";
-								question += ",'" + surname2 + "'";
-								question += ",'" + getRandomInt(30) + "." + getRandomInt(30) + "." + yea2r + "'";
-								question += ",'" + email2 + "'";
-								question += ",'12345'";
-								question += ",'" + "Profesor" + "')";
-								sql_querry(connection, err, question).then(res => {
-									var id_prof = i + year + getRandomInt(10000);
-									question = "INSERT INTO PROF VALUES(";
-									question += id_prof;
-									question += ",'" + name2;
-									question += "','" + surname2;
-									question += "')";
-									sql_querry(connection, err, question).then(res => {
-										question = "INSERT INTO ORAR VALUES(";
-										question += i + year + getRandomInt(100000);
-										question += "," + id_grupa;
-										question += "," + getRandomInt(template.courses.length);
-										question += "," + getRandomInt(45);
-										question += "," + idSala;
-										question += "," + id_prof;
-										question += ")";
-										sql_querry(connection, err, question);
-									});
-								});
+								question = "INSERT INTO ORAR VALUES(";
+								question += i + year + getRandomInt(100000);
+								question += "," + id_grupa;
+								question += "," + getRandomInt(template.courses.length);
+								question += "," + getRandomInt(45);
+								question += "," + idSala;
+								question += "," + id_prof;
+								question += ")";
+								sql_querry(connection, err, question);
 							});
 						});
-				} else {
-					//inseram in grupa un student
-					question = "INSERT INTO STUDENTI_GRUPA VALUES(";
-					question += matricol + "," + id_grupa + ")";
-					sql_querry(connection, err, question);
-					populare_grupa++;
-				}
-			});
-		});
-	}
+					});
+				});
+		} else {
+			//inseram in grupa un student
+			question = "INSERT INTO STUDENTI_GRUPA VALUES(";
+			question += students + "," + id_grupa + ")";
+			sql_querry(connection, err, question);
+			populare_grupa++;
+		}
+	});
 }
 
 module.exports = {
